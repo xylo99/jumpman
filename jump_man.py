@@ -1,51 +1,126 @@
 #!/usr/bin/env python3
+import sys
+import time
 import numpy
+import shutil
 import pandas
 import scipy.constants
-import shutil
 
 class Player:
     def __init__(self, ceil_h, x_pos, yh_pos):
         self.ch = ceil_h #Represents the height of the ceiling from the ground.
         self.x = x_pos #The random xpos that's assigned at initialization
-        self.yh = yh_pos #The distance from the head 
-    
-    #The corresponding test for this function is test1  
-    #Print the jumpman on the x-axis at specified x position  
-    def print_jm(self):
-        jm = ['o','/','|', '\\', '/','\\']
-        head = jm[0]
-        middle = ''.join(map(str, jm[1:4]))
-        tail = ' '.join(map(str, jm[4:6]))
-        if self.x > 0:
-            s_area = shutil.get_terminal_size().columns
-            player = ' ' + head + '\n' + middle + '\n ' + tail
-            print(head.center((s_area//2) - ((s_area//2) - self.x)))
-            print(middle.center((s_area//2) - ((s_area//2) - self.x)))
-            print(tail.center((s_area//2) - ((s_area//2) - self.x)))
-    
-    #Note: this erases all of the jumpmen because of line 37 (5th line in function)
-    #TODO: add three conditions (named cond in param):
-    #      The first condition is when the initial jump happens. All jumpmen are erased for their reprinting
-    #      The second condition is after the jumpmen are reprinted after an attempted jump. Every jumpmen gets erased. Thus we erase each line that's under the ceiling.
-    def erase_jm(cond, bot):
-        if cond == 'start':
-            for n in range(3):
-                sys.stdout.write(u'\u001b[' + str(n) + 'A')
-                sys.stdout.write(u'\033[K')
-                print('')
-        elif cond == 'end':         
-            ypos = self.yh
-            for n in range(ypos-3):
-                sys.stdout.write(u'\u001b[' + str(n) + 'A') #move courser down by one
-                sys.stdout.write(u'\033[K') #erase entire line.
-                print('')
-        
-        
+        self.yh = yh_pos #The distance from the head to the ceiling
+        self.jm = [' o ','/','|', '\\', '/','\\']
+        self.head = self.jm[0]
+        self.middle = ''.join(map(str, self.jm[1:4]))
+        self.tail = ' '.join(map(str, self.jm[4:6]))
+        self.ypos = 0
 
-    #The program must get better at using this function
-    #@param (float) what the program will guess. 
-    def jump(self, guess):
-        result = check_guess(guess) #This function will return how close you are to the answer. It's possible to be too low/high.
-        dist_frm_ceil = self.ch
-        erase_jm
+    def set_ypos(self, ypos):
+        self.ypos = ypos
+
+    def get_ypos(self):
+        return self.ypos
+
+    def print_head(self):
+        print(self.head, end='')
+
+    def print_middle(self):
+        print(self.middle, end='')
+
+    def print_tail(self):
+        print(self.tail, end='')
+
+    def get_head(self):
+        return self.jm[0]
+
+    def get_middle(self):
+        return self.middle
+
+    def get_tail(self):
+        return self.tail
+
+    def print_next_section(self, which, inline):
+        if inline:
+            sys.stdout.write(u'\u001b[' + str(1) + 'B')
+            sys.stdout.write(u'\u001b[' + str(3) + 'D')
+            print(which, end='')
+        else:
+            print('\n' + which)
+
+    def print_at_pos(self, section, x_pos=0, y_pos=0, reset_x=False, reset_y=False):
+        if x_pos == 0 and y_pos == 0:
+            print(section[0])
+            self.print_next_section(section[1], False)
+            self.print_next_section(section[2], False)
+        elif x_pos == 0 and y_pos > 0:
+            sys.stdout.write(u'\u001b[' + str(y_pos) + 'A')
+            print(section[0])
+            self.print_next_section(section[1], False)
+            self.print_next_section(section[2], False)
+            if reset_y:
+                sys.stdout.write(u'\u001b[' + str(y_pos) + 'B')
+        elif x_pos == 0 and y_pos < 0:
+            sys.stdout.write(u'\u001b[' + str(-y_pos) + 'B')
+            sys.stdout.write((section[0]))
+            self.print_next_section(section[1], False)
+            self.print_next_section(section[2], False)
+            print()
+            if reset_y:
+                sys.stdout.write(u'\u001b[' + str(-y_pos + 3) + 'A')
+        elif x_pos > 0 and y_pos == 0:
+            sys.stdout.write(u'\u001b[' + str(x_pos) + 'C')
+            print(section[0], end='')
+            self.print_next_section(section[1], True)
+            self.print_next_section(section[2], True)
+            print()
+        elif x_pos < 0 and y_pos == 0:
+            sys.stdout.write(u'\u001b[' + str(-x_pos) + 'D')
+            print(section[0], end='')
+            self.print_next_section(section[1], True)
+            self.print_next_section(section[2], True)
+            if reset_x:
+                sys.stdout.write(u'\u001b[' + str(-x_pos) + 'D')
+            if reset_y:
+                sys.stdout.write(u'\u001b[' + str(y_pos + 3) + 'B')
+        elif x_pos < 0 and y_pos > 0:
+            sys.stdout.write(u'\u001b[' + str(-x_pos) + 'D')
+            sys.stdout.write(u'\u001b[' + str(y_pos) + 'A')
+            print(section[0], end='')
+            self.print_next_section(section[1], True)
+            self.print_next_section(section[2], True)
+            if reset_x:
+                sys.stdout.write(u'\u001b[' + str(-x_pos) + 'C')
+            if reset_y:
+                sys.stdout.write(u'\u001b[' + str(y_pos + 3) + 'B')
+        elif x_pos > 0 and y_pos > 0:
+            sys.stdout.write(u'\u001b[' + str(x_pos) + 'C')
+            sys.stdout.write(u'\u001b[' + str(y_pos) + 'A')
+            print(section[0], end='')
+            self.print_next_section(section[1], True)
+            self.print_next_section(section[2], True)
+            if reset_x:
+                sys.stdout.write(u'\u001b[' + str(x_pos) + 'D')
+            if reset_y:
+                sys.stdout.write(u'\u001b[' + str(-y_pos + 3) + 'B')
+        elif x_pos > 0 and y_pos < 0:
+            sys.stdout.write(u'\u001b[' + str(x_pos) + 'C')
+            sys.stdout.write(u'\u001b[' + str(-y_pos) + 'B')
+            sys.stdout.write(section[0])
+            self.print_next_section(section[1], True)
+            self.print_next_section(section[2], True)
+            if reset_x:
+                sys.stdout.write(u'\u001b[' + str(x_pos) + 'D')
+            if reset_y:
+                sys.stdout.write(u'\u001b[' + str(-y_pos + 3) + 'A')
+        elif x_pos < 0 and y_pos < 0:
+            sys.stdout.write(u'\u001b[' + str(-x_pos) + 'D')
+            sys.stdout.write(u'\u001b[' + str(-y_pos) + 'B')
+            print(section[0], end='')
+            self.print_next_section(section[1], True)
+            self.print_next_section(section[2], True)
+            if reset_x:
+                sys.stdout.write(u'\u001b[' + str(-x_pos) + 'D')
+            if reset_y:
+                sys.stdout.write(u'\u001b[' + str(-y_pos + 3) + 'A')
