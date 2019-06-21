@@ -1,1 +1,7 @@
-This is a ASCII based machine learning project that uses a genetic algorithm to teach the players (i.e: the stick figures) how to jump to the ceiling (depicted as a line) under certain conditions.
+Introduction
+============
+
+This is an ASCII based machine learning project where players (depicted as stick figures) jump to a point in the console.
+New generations are players who have reached the jump at the end of the jump. There are rounds in which every player get a chance to jump.
+In each round, the point that the player has to jump to increases. 
+It is up to the algorithm to choose an appropriate number from a set so that the height jumped is equal to the point the player need to get to.
