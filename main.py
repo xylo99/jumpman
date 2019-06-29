@@ -47,6 +47,7 @@ def jump(count, ceil_h, x_pos, hdist):
     erase_jm(ceil_h, False)
     time.sleep(1)
     sys.stdout.write(u'\u001b[' + str(s_area) + 'D')
+    sys.stdout.write(u'\u001b[' + str(3) + 'A')
     sys.stdout.flush()
 
     for i in range(count):
@@ -54,7 +55,7 @@ def jump(count, ceil_h, x_pos, hdist):
         random.shuffle(num)
         y = num.pop()
         men[i].set_ypos(y)
-        men[i].print_at_pos(player, 2, y+3, False, False)
+        men[i].print_at_pos(player, 2, y+2, False, True)
 
     sys.stdout.flush()
     time.sleep(1)
@@ -63,5 +64,5 @@ def jump(count, ceil_h, x_pos, hdist):
 if __name__=='__main__':
     subprocess.run(['clear'])
     for i in range(5):
-        jump(3, 20, 10, 10)
+        jump(7, 20, 10, 10)
         subprocess.run(['clear'])

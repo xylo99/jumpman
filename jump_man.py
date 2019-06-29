@@ -103,7 +103,7 @@ class Player:
             if reset_x:
                 sys.stdout.write(u'\u001b[' + str(x_pos) + 'D')
             if reset_y:
-                sys.stdout.write(u'\u001b[' + str(-y_pos + 3) + 'B')
+                sys.stdout.write(u'\u001b[' + str(y_pos - 3) + 'B')
         elif x_pos > 0 and y_pos < 0:
             sys.stdout.write(u'\u001b[' + str(x_pos) + 'C')
             sys.stdout.write(u'\u001b[' + str(-y_pos) + 'B')
