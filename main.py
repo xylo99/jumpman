@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import jump_man
+import jm_env
 import subprocess
 import random
 import shutil
@@ -30,7 +31,10 @@ def erase_jm(amount, s_state=False):
 def jump(count, ceil_h, x_pos, hdist):
     s_area = shutil.get_terminal_size().columns
     pos = s_area - (s_area - x_pos)
+    stage = jm_env.env(s_area)
     men = []
+    stage.print_lines()
+    sys.stdout.write(u'\u001b[' + str(3) + 'A')
     for i in range(count):
         men.append(jump_man.Player(ceil_h, x_pos, hdist)) #args are:  ceiling height, x_pos, dist from head to ceil.
 
@@ -63,6 +67,10 @@ def jump(count, ceil_h, x_pos, hdist):
 
 if __name__=='__main__':
     subprocess.run(['clear'])
-    for i in range(5):
-        jump(7, 20, 10, 10)
+    for i in range(3):
+        jump(7, 20, 10, 10) #args are count, ceil_h, x_pos, hdist
+        subprocess.run(['clear'])
+
+    for i in range(3):
+        jump(7, 30, 10, 10)
         subprocess.run(['clear'])
